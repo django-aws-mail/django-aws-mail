@@ -1,0 +1,7 @@
+*.pyc
+*.db
+.DS_Store
+.idea
+__pycache__
+dist
+poetry.lock
