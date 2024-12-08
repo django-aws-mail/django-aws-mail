@@ -8,7 +8,7 @@ authors = [
 ]
 
 description = "AWS mail using SES and SNS for Django."
-readme = ["README.md", "LICENSE"]
+readme = "README.rst"
 
 repository = "https://github.com/django-aws-mail/django-aws-mail"
 
