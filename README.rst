@@ -1,7 +1,7 @@
 Django-AWS-Mail
 ===============
 
-:Info: A Django email backend for Amazon's Simple Email Service (SES) and views + signals for Amazin's Simple Notification Service (SNS).
+:Info: A Django email backend for Amazon's Simple Email Service (SES) and views + signals for Amazon's Simple Notification Service (SNS).
 
 :Author: Bas van Gaalen (http://github.com/webtweakers)
 
