@@ -10,8 +10,8 @@ def get_mail_type(mail):
     else:
         mail_type = None
 
-    if mail_type and mail_type in settings.AWS_MAIL_TYPES:
-        return settings.AWS_MAIL_TYPES[mail_type]
+    if mail_type and mail_type in settings.MAIL_TYPES:
+        return settings.MAIL_TYPES[mail_type]
     else:
         return 'email of unknown type'
 

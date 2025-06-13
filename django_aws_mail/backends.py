@@ -29,9 +29,9 @@ class EmailBackend(BaseEmailBackend):
 
         super().__init__(fail_silently=fail_silently, **kwargs)
 
-        self.region_name = aws_region_name or settings.AWS_REGION_NAME
-        self.access_key_id = aws_access_key_id or settings.AWS_ACCESS_KEY_ID
-        self.secret_access_key = aws_secret_access_key or settings.AWS_SECRET_ACCESS_KEY
+        self.region_name = aws_region_name or settings.MAIL_AWS_REGION_NAME
+        self.access_key_id = aws_access_key_id or settings.MAIL_AWS_ACCESS_KEY_ID
+        self.secret_access_key = aws_secret_access_key or settings.MAIL_AWS_SECRET_ACCESS_KEY
 
         self.connection = None
 

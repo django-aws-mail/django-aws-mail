@@ -54,7 +54,7 @@ class NotificationVerifier(object):
 
     def check_topic_header(self):
         # if necessary, check that the topic is correct
-        if hasattr(settings, 'AMAZON_SNS_TOPIC_ARN'):
+        if hasattr(settings, 'MAIL_AWS_SNS_TOPIC_ARN'):
 
             # confirm that the proper topic header was sent
             if 'HTTP_X_AMZ_SNS_TOPIC_ARN' not in self._request.META:
@@ -63,9 +63,9 @@ class NotificationVerifier(object):
 
             # check to see if the topic is in the settings
             # bounces and complaints can come from multiple topics
-            # AMAZON_SNS_TOPIC_ARN is a list
+            # MAIL_AWS_SNS_TOPIC_ARN is a list
             topic_hdr = self._request.META['HTTP_X_AMZ_SNS_TOPIC_ARN']
-            if topic_hdr not in settings.AMAZON_SNS_TOPIC_ARN:
+            if topic_hdr not in settings.MAIL_AWS_SNS_TOPIC_ARN:
                 logger.warning(f"Notification contains bad topic: {topic_hdr}")
                 return False
 
@@ -122,7 +122,7 @@ class NotificationVerifier(object):
             return False
 
         # verify that the notification is signed by Amazon
-        if getattr(settings, 'AWS_SNS_VERIFY_CERTIFICATE', True):
+        if getattr(settings, 'MAIL_AWS_SNS_VERIFY_CERTIFICATE', True):
             # get certificate
             pem_data = self.get_keyfile(cert_url)
             if not pem_data:

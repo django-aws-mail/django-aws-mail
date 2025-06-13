@@ -29,7 +29,7 @@ class AwsSnsWebhook(View):
 
     def post(self, request, *args, **kwargs):
         verifier = NotificationVerifier(request)
-        if settings.AWS_SNS_VERIFY_NOTIFICATION and not verifier.is_verified:
+        if settings.MAIL_AWS_SNS_VERIFY_NOTIFICATION and not verifier.is_verified:
             return HttpResponseBadRequest('Invalid notification')
 
         notification = verifier.get_notification()
