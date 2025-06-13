@@ -1,4 +1,3 @@
-import re
 from email.utils import formataddr
 
 from django.core.mail import EmailMultiAlternatives
@@ -9,56 +8,39 @@ from django_aws_mail import settings
 from django_aws_mail.html import HTMLParser
 
 
-def compose(
-        recipients,
-        subject,
-        html_template,
-        text_template=None,
-        context=None,
-        from_email=None,
-        ses_configuration_set=None,
-        ses_mail_type_tag=None):
-
+def compose(recipients, subject, template, context=None, from_email=None, **kwargs):
     """
     Create a multipart MIME email message, by rendering html and text body.
+    Optionally add ses_configuration_set and ses_mail_type_tag to the kwargs.
     """
-    # sanitize input: subject, recipients, from
+    # sanitize input: subject, recipients, from email
     subject = ''.join(subject.splitlines())
-
     if not isinstance(recipients, list):
         recipients = [recipients]
-
     if not from_email:
         from_email = settings.DEFAULT_FROM_EMAIL
     if not isinstance(from_email, str):
         from_email = formataddr(from_email)
 
+    # render html content
     context = context or {}
-
-    # render content
-    html = render_to_string(html_template, context).strip()
+    html = render_to_string(template, context).strip()
     html = strip_spaces_between_tags(html)
-    if text_template:
-        text = render_to_string(text_template, context).strip()
-    else:
-        # convert html to text and cleanup
-        parser = HTMLParser()
-        parser.feed(html)
-        parser.close()
-        text = parser.text()
 
-    # remove excessive white-space
-    text = re.sub(r'( {2,})', '', text)
-    text = re.sub(r'(\s{3,})', '\n\n', text)
+    # convert html to text
+    parser = HTMLParser()
+    parser.feed(html)
+    parser.close()
+    text = parser.text()
 
-    # create message
-    message = EmailMultiAlternatives(subject, text, from_email, to=recipients)
+    # create email message
+    message = EmailMultiAlternatives(subject, text, from_email, recipients)
     message.attach_alternative(html, 'text/html')
 
-    # attach SES specific headers
-    if ses_configuration_set:
-        message.extra_headers['X-Ses-Configuration-Set'] = ses_configuration_set
-    if ses_mail_type_tag:
-        message.extra_headers['X-Ses-Message-Tags'] = f'mail-type={ses_mail_type_tag}'
+    # attach optional SES specific headers
+    if 'ses_configuration_set' in kwargs:
+        message.extra_headers['X-Ses-Configuration-Set'] = kwargs['ses_configuration_set']
+    if 'ses_mail_type_tag' in kwargs:
+        message.extra_headers['X-Ses-Message-Tags'] = f"mail-type={kwargs['ses_mail_type_tag']}"
 
     return message
