@@ -11,7 +11,7 @@ from django_aws_mail.html import HTMLParser
 def compose(recipients, subject, template, context=None, from_email=None, **kwargs):
     """
     Create a multipart MIME email message, by rendering html and text body.
-    Optionally add ses_configuration_set and ses_mail_type_tag to the kwargs.
+    Optionally add SES headers config_set and mail_type to the kwargs.
     """
     # sanitize input: subject, recipients, from email
     subject = ''.join(subject.splitlines())
@@ -33,14 +33,16 @@ def compose(recipients, subject, template, context=None, from_email=None, **kwar
     parser.close()
     text = parser.text()
 
+    # get optional headers
+    headers = {}
+    if 'headers' in kwargs:
+        headers = kwargs.pop('headers')
+    if 'config_set' in kwargs:
+        headers['X-Ses-Configuration-Set'] = kwargs.pop('config_set')
+    if 'mail_type' in kwargs:
+        headers['X-Ses-Message-Tags'] = f"mail-type={kwargs.pop('mail_type')}"
+
     # create email message
-    message = EmailMultiAlternatives(subject, text, from_email, recipients)
+    message = EmailMultiAlternatives(subject, text, from_email, recipients, headers=headers, **kwargs)
     message.attach_alternative(html, 'text/html')
-
-    # attach optional SES specific headers
-    if 'ses_configuration_set' in kwargs:
-        message.extra_headers['X-Ses-Configuration-Set'] = kwargs['ses_configuration_set']
-    if 'ses_mail_type_tag' in kwargs:
-        message.extra_headers['X-Ses-Message-Tags'] = f"mail-type={kwargs['ses_mail_type_tag']}"
-
     return message
