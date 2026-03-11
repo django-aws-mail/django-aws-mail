@@ -7,7 +7,7 @@ A Django email backend for Amazon's Simple Email Service (SES) v2 and utility vi
 :Author: Bas van Gaalen (http://github.com/webtweakers)
 :License: MIT
 
-.. image:: https://img.shields.io/pypi/v/django-aws-mail.svg?v=0.4.3
+.. image:: https://img.shields.io/pypi/v/django-aws-mail.svg
 
 
 Features

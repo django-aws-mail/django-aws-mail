@@ -6,9 +6,8 @@ build-backend = "poetry.core.masonry.api"
 [project]
 name = "django-aws-mail"
 license = "MIT"
-version = "0.4.3"
+version = "0.4.4"
 description = "AWS mail for Django using SES and SNS."
-repository = "https://github.com/django-aws-mail/django-aws-mail"
 keywords = ["amazon", "mail", "aws", "ses", "sns", "django"]
 authors = [
     { name = "Bas van Gaalen", email = "webtweakers@gmail.com" },
@@ -30,5 +29,9 @@ packages = [{include = "django_aws_mail"}]
 include = ["sandbox", "example.env", "LICENSE", "README.rst"]
 
 
-[tool.poetry.scripts]
+[project.scripts]
 manage = "sandbox.manage:main"
+
+
+[project.urls]
+Repository = "https://github.com/django-aws-mail/django-aws-mail"
