@@ -27,6 +27,7 @@ dependencies = [
 
 [tool.poetry]
 packages = [{include = "django_aws_mail"}]
+include = ["sandbox", "example.env", "LICENSE", "README.rst"]
 
 
 [tool.poetry.scripts]
