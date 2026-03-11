@@ -13,7 +13,8 @@ from django.views.generic import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
-from django_aws_mail import settings, signals
+from django_aws_mail import signals
+from django_aws_mail.config import mail_settings
 from django_aws_mail.verifier import NotificationVerifier
 
 logger = logging.getLogger(__name__)
@@ -29,7 +30,7 @@ class AwsSnsWebhook(View):
 
     def post(self, request, *args, **kwargs):
         verifier = NotificationVerifier(request)
-        if settings.MAIL_AWS_SNS_VERIFY_NOTIFICATION and not verifier.is_verified:
+        if mail_settings.AWS_SNS_VERIFY_NOTIFICATION and not verifier.is_verified:
             return HttpResponseBadRequest('Invalid notification')
 
         notification = verifier.get_notification()

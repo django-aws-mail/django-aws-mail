@@ -1,7 +1,7 @@
 from django.urls import reverse
 from django.utils.html import format_html
 
-from django_aws_mail import settings
+from django_aws_mail.config import mail_settings
 
 
 def get_mail_type(mail):
@@ -10,8 +10,8 @@ def get_mail_type(mail):
     else:
         mail_type = None
 
-    if mail_type and mail_type in settings.MAIL_TYPES:
-        return settings.MAIL_TYPES[mail_type]
+    if mail_type and mail_type in mail_settings.MAIL_TYPES:
+        return mail_settings.MAIL_TYPES[mail_type]
     else:
         return 'email of unknown type'
 

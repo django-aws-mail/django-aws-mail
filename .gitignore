@@ -2,7 +2,7 @@
 *.db
 .DS_Store
 .idea
+.venv
 __pycache__
 dist
-poetry.lock
-manage.py
+.env

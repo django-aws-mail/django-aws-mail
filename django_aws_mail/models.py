@@ -1,9 +1,9 @@
 from django.db import models
+from django.conf import settings
 from django.utils import timezone
 from django.utils.html import urlize, linebreaks
 from django.utils.translation import gettext_lazy as _
 
-from django_aws_mail import settings
 from django_aws_mail.utils import get_mail_type
 
 FEEDBACK_BOUNCE_MESSAGE = {

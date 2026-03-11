@@ -1,27 +1,33 @@
-[tool.poetry]
-name = "django-aws-mail"
-version = "0.3"
-license = "MIT"
-
-authors = [
-  "Bas van Gaalen <bas@webtweakers.com>",
-]
-
-description = "AWS mail for Django using SES and SNS."
-readme = "README.rst"
-
-repository = "https://github.com/django-aws-mail/django-aws-mail"
-
-keywords = ["amazon", "mail", "aws", "ses", "sns", "django"]
-
-[tool.poetry.dependencies]
-python = ">=3.9"
-boto3 = ">=1.0.0"
-django = ">=4.2.16"
-cryptography = ">=43.0.3"
-requests = ">=2.32.1"
-django-json-widget = ">=2.0.0"
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[project]
+name = "django-aws-mail"
+license = "MIT"
+version = "0.4.0"
+description = "AWS mail for Django using SES and SNS."
+repository = "https://github.com/django-aws-mail/django-aws-mail"
+keywords = ["amazon", "mail", "aws", "ses", "sns", "django"]
+authors = [
+    { name = "Bas van Gaalen", email = "webtweakers@gmail.com" },
+]
+readme = "README.rst"
+requires-python = ">=3.12"
+
+dependencies = [
+    "django (>=5.1.2)",
+    "boto3 (>=1.0.0)",
+    "cryptography (>=43.0.3)",
+    "requests (>=2.32.1)",
+    "django-json-widget (>=2.0.1)",
+]
+
+
+[tool.poetry]
+packages = [{include = "django_aws_mail"}]
+
+
+[tool.poetry.scripts]
+manage = "sandbox.manage:main"

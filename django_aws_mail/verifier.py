@@ -11,7 +11,7 @@ from cryptography import x509
 
 from django.core.cache import cache
 
-from django_aws_mail import settings
+from django_aws_mail.config import mail_settings
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class NotificationVerifier(object):
 
     def check_topic_header(self):
         # if necessary, check that the topic is correct
-        if hasattr(settings, 'MAIL_AWS_SNS_TOPIC_ARN'):
+        if mail_settings.AWS_SNS_TOPIC_ARN:
 
             # confirm that the proper topic header was sent
             if 'HTTP_X_AMZ_SNS_TOPIC_ARN' not in self._request.META:
@@ -65,7 +65,7 @@ class NotificationVerifier(object):
             # bounces and complaints can come from multiple topics
             # MAIL_AWS_SNS_TOPIC_ARN is a list
             topic_hdr = self._request.META['HTTP_X_AMZ_SNS_TOPIC_ARN']
-            if topic_hdr not in settings.MAIL_AWS_SNS_TOPIC_ARN:
+            if topic_hdr not in mail_settings.SNS_TOPIC_ARN:
                 logger.warning(f"Notification contains bad topic: {topic_hdr}")
                 return False
 
@@ -122,7 +122,8 @@ class NotificationVerifier(object):
             return False
 
         # verify that the notification is signed by Amazon
-        if getattr(settings, 'MAIL_AWS_SNS_VERIFY_CERTIFICATE', True):
+        # if getattr(settings, 'MAIL_AWS_SNS_VERIFY_CERTIFICATE', True):
+        if mail_settings.AWS_SNS_VERIFY_CERTIFICATE:
             # get certificate
             pem_data = self.get_keyfile(cert_url)
             if not pem_data:

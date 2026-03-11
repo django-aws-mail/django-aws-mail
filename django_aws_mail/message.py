@@ -1,10 +1,10 @@
 from email.utils import formataddr
 
+from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_spaces_between_tags
 
-from django_aws_mail import settings
 from django_aws_mail.html import HTMLParser
 
 

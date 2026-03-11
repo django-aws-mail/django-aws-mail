@@ -4,12 +4,12 @@ Inspired by django-amazon-ses.
 """
 import boto3
 from botocore.exceptions import ClientError, BotoCoreError
+from email.utils import parseaddr
 
+from django import get_version
 from django.core.mail.backends.base import BaseEmailBackend
-from django.core.mail.message import sanitize_address
-
 from django_aws_mail.signals import mail_pre_send, mail_post_send
-from django_aws_mail import settings
+from django_aws_mail.config import mail_settings
 
 
 class EmailBackend(BaseEmailBackend):
@@ -20,90 +20,80 @@ class EmailBackend(BaseEmailBackend):
     Overrides the default setting:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     """
-    def __init__(self,
-                 aws_region_name=None,
-                 aws_access_key_id=None,
-                 aws_secret_access_key=None,
-                 fail_silently=False,
-                 **kwargs):
-
-        super().__init__(fail_silently=fail_silently, **kwargs)
-
-        self.region_name = aws_region_name or settings.MAIL_AWS_REGION_NAME
-        self.access_key_id = aws_access_key_id or settings.MAIL_AWS_ACCESS_KEY_ID
-        self.secret_access_key = aws_secret_access_key or settings.MAIL_AWS_SECRET_ACCESS_KEY
-
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.region_name = kwargs.get('aws_region_name') or mail_settings.AWS_REGION_NAME
+        self.access_key_id = kwargs.get('aws_access_key_id') or mail_settings.AWS_ACCESS_KEY_ID
+        self.secret_access_key = kwargs.get('aws_secret_access_key') or mail_settings.AWS_SECRET_ACCESS_KEY
         self.connection = None
 
     def open(self):
         if self.connection:
             return False
-
         try:
-            self.connection = boto3.client('sesv2',
-                                           region_name=self.region_name,
-                                           aws_access_key_id=self.access_key_id,
-                                           aws_secret_access_key=self.secret_access_key)
+            self.connection = boto3.client(
+                'sesv2',
+                region_name=self.region_name,
+                aws_access_key_id=self.access_key_id,
+                aws_secret_access_key=self.secret_access_key
+            )
+            return True
         except Exception:
             if not self.fail_silently:
                 raise
+            return False
 
     def close(self):
-        self.connection.close()
-        self.connection = None
+        if self.connection:
+            self.connection = None
+
+    def _prepare_message(self, email_message):
+        """Extracts envelope info and generates raw MIME data."""
+        recipients = [parseaddr(addr)[1] for addr in email_message.recipients()]
+        _, from_envelope = parseaddr(email_message.from_email)
+
+        if get_version() < '6.0':
+            # Support for legacy Django MIME handling
+            data = email_message.message().as_bytes(linesep='\r\n')
+        else:
+            import email.policy
+            # Support for modern Django 6.0+ Python Email API
+            data = email_message.message(policy=email.policy.SMTPUTF8).as_bytes()
+
+        return from_envelope, recipients, data
 
     def send_messages(self, email_messages):
         if not email_messages:
             return 0
 
-        new_conn_created = self.open()
+        self.open()
         if not self.connection:
-            # fail silently
             return 0
 
         num_sent = 0
-        for message in email_messages:
-            sent = self._send(message)
-            if sent:
+        for msg in email_messages:
+            if self._send(msg):
                 num_sent += 1
 
-        if new_conn_created:
-            self.close()
         return num_sent
 
     def _send(self, email_message):
-        # sending the pre-send signal here allows for changing the message,
-        # eg: when removing all recipients (blacklisted) the message will not be sent.
         mail_pre_send.send(self.__class__, message=email_message)
-
         if not email_message.recipients():
             return False
 
-        encoding = email_message.encoding or settings.DEFAULT_CHARSET
-        from_email = sanitize_address(email_message.from_email, encoding)
-        recipients = [sanitize_address(addr, encoding) for addr in email_message.recipients()]
-        message = email_message.message()
-
-        mail_kwargs = {
-            'FromEmailAddress': from_email,
-            'Destination': {
-                'ToAddresses': recipients,
-            },
-            'Content': {
-                'Raw': {
-                    'Data': message.as_bytes(linesep='\r\n'),
-                },
-            },
-        }
+        from_envelope, recipients, data = self._prepare_message(email_message)
 
         try:
-            response = self.connection.send_email(**mail_kwargs)
+            response = self.connection.send_email(
+                FromEmailAddress=from_envelope,
+                Destination={'ToAddresses': recipients},
+                Content={'Raw': {'Data': data}}
+            )
         except (BotoCoreError, ClientError):
             if not self.fail_silently:
                 raise
             return False
 
-        else:
-            mail_post_send.send(self.__class__, message=email_message, response=response)
-
+        mail_post_send.send(self.__class__, message=email_message, response=response)
         return True
