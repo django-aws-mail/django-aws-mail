@@ -28,5 +28,5 @@ Configuration
 =============
 Make sure to have `AUTH_USER_MODEL` and `DEFAULT_FROM_EMAIL` defined in your Django settings.
 
-Have a look at the `.env.example` file and create `.env` with your AWS configuration.
+Have a look at the `example.env` file and copy it to `.env` with your AWS configuration.
 You can also configure those values directly in your Django settings, if you prefer.
