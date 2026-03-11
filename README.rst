@@ -1,44 +1,108 @@
+===============
 Django-AWS-Mail
 ===============
 
-:Info: A Django email backend for Amazon's Simple Email Service (SES) and views + signals for Amazon's Simple Notification Service (SNS).
+A Django email backend for Amazon's Simple Email Service (SES) v2 and utility views + signals for Amazon's Simple Notification Service (SNS).
 
 :Author: Bas van Gaalen (http://github.com/webtweakers)
+:License: MIT
 
 .. image:: https://badge.fury.io/py/django-aws-mail.svg
     :target: https://badge.fury.io/py/django-aws-mail
 
+Features
+========
 
-Usage
-=====
-To install the requirements you'll first have to run this command:
+* Fully compatible with **Django 6.0+** (Modern Python Email API).
+* Supports **AWS SESv2** (via boto3).
+* Integrated with **AWS SNS** for bounce and complaint handling.
+* Flexible configuration via Django settings or environment variables.
+* Comprehensive signal support for tracking email lifecycles.
 
-`poetry install`
+Installation
+============
 
-You may need to run the following command in order for .env files to be read:
+Install the package via pip or poetry:
 
-`poetry self add poetry-plugin-dotenv`
+.. code-block:: bash
 
-Just type this on the command line from the root directory:
-
-`poetry run manage`
-
+    pip install django-aws-mail
 
 Configuration
 =============
-Make sure to have `AUTH_USER_MODEL` and `DEFAULT_FROM_EMAIL` defined in your Django settings.
 
-Have a look at the `example.env` file and copy it to `.env` with your AWS configuration.
-You can also configure those values directly in your Django settings, if you prefer.
+Add the backend to your Django ``settings.py``:
 
-These values should be defined:
+.. code-block:: python
 
-```
-MAIL_AWS_REGION_NAME=eu-west-1
-MAIL_AWS_ACCESS_KEY_ID=ABC123
-MAIL_AWS_SECRET_ACCESS_KEY=S3cr3t
+    EMAIL_BACKEND = 'django_aws_mail.backends.EmailBackend'
 
-MAIL_AWS_SNS_TOPIC_ARN=arn:aws:sns:eu-west-1:123:abc
-MAIL_AWS_SNS_VERIFY_NOTIFICATION=true
-MAIL_AWS_SNS_VERIFY_CERTIFICATE=true
-```
+Usage
+=====
+
+The library provides a ``compose`` utility to easily create multipart emails (HTML and Text) using Django templates.
+
+.. code-block:: python
+
+    from django_aws_mail.utils import compose
+
+    # Create the message
+    message = compose(
+        recipients=["customer@example.com"],
+        subject="Welcome to our service!",
+        template="email/welcome.html",
+        context={"name": "John Doe"},
+        from_email="Support <support@example.com>"
+    )
+
+    # Send it
+    message.send()
+
+Signals
+=======
+
+The library provides a rich set of signals to track the lifecycle of your emails.
+
+Backend Signals
+---------------
+
+These fire during the ``.send()`` process within your application:
+
+* ``mail_pre_send``: Fired before the message is sent to AWS.
+* ``mail_post_send``: Fired after a successful API response from AWS.
+
+SNS Webhook Signals
+-------------------
+
+These are triggered by AWS SNS notifications (via the provided webhook views):
+
+* ``mail_send``: The email was successfully sent by SES.
+* ``mail_delivery``: The email was successfully delivered to the recipient.
+* ``mail_bounce``: The email bounced (Hard or Soft).
+* ``mail_complaint``: The recipient marked the email as spam.
+* ``mail_reject``: SES rejected the email (e.g., due to virus or blacklisting).
+* ``mail_delivery_delay``: There is a delay in delivering the email.
+* ``mail_open``: The recipient opened the email (requires SES tracking).
+* ``mail_click``: The recipient clicked a link (requires SES tracking).
+
+Example Usage:
+
+.. code-block:: python
+
+    from django.dispatch import receiver
+    from django_aws_mail.signals import mail_bounce, mail_complaint
+
+    @receiver(mail_bounce)
+    def handle_bounce(sender, message_id, bounce_type, **kwargs):
+        # Handle the bounce (e.g., deactivate the user's email)
+        print(f"Email {message_id} bounced. Type: {bounce_type}")
+
+Development
+===========
+
+To run the sandbox management command:
+
+.. code-block:: bash
+
+    poetry install
+    poetry run manage
