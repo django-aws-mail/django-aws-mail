@@ -8,7 +8,7 @@ A Django email backend for Amazon's Simple Email Service (SES) v2 and utility vi
 :License: MIT
 
 .. image:: https://img.shields.io/pypi/v/django-aws-mail.svg
-
+    :target: https://pypi.org/project/django-aws-mail/
 
 Features
 ========
@@ -36,6 +36,21 @@ Add the backend to your Django ``settings.py``:
 .. code-block:: python
 
     EMAIL_BACKEND = 'django_aws_mail.backends.EmailBackend'
+
+Environment Variables
+---------------------
+
+The library automatically detects the following environment variables (or Django settings). Copy ``example.env`` to ``.env`` to get started:
+
+.. code-block:: text
+
+    MAIL_AWS_REGION_NAME=eu-west-1
+    MAIL_AWS_ACCESS_KEY_ID=ABC123
+    MAIL_AWS_SECRET_ACCESS_KEY=S3cr3t
+
+    MAIL_AWS_SNS_TOPIC_ARN=arn:aws:sns:eu-west-1:123:abc
+    MAIL_AWS_SNS_VERIFY_NOTIFICATION=true
+    MAIL_AWS_SNS_VERIFY_CERTIFICATE=true
 
 Usage
 =====
@@ -74,7 +89,8 @@ These fire during the ``.send()`` process within your application:
 SNS Webhook Signals
 -------------------
 
-These are triggered by AWS SNS notifications (via the provided webhook views):
+These are triggered by AWS SNS notifications via the provided webhook views.
+For more information on the contents of these notifications, see the `AWS SES documentation <https://docs.aws.amazon.com/ses/latest/dg/notification-contents.html>`_.
 
 * ``mail_send``: The email was successfully sent by SES.
 * ``mail_delivery``: The email was successfully delivered to the recipient.
@@ -85,16 +101,19 @@ These are triggered by AWS SNS notifications (via the provided webhook views):
 * ``mail_open``: The recipient opened the email (requires SES tracking).
 * ``mail_click``: The recipient clicked a link (requires SES tracking).
 
-Example Usage:
+Signal Example:
 
 .. code-block:: python
 
     from django.dispatch import receiver
-    from django_aws_mail.signals import mail_bounce, mail_complaint
+    from django_aws_mail.signals import mail_bounce
 
     @receiver(mail_bounce)
-    def handle_bounce(sender, message_id, bounce_type, **kwargs):
-        # Handle the bounce (e.g., deactivate the user's email)
+    def handle_bounce(sender, mail, event, message, **kwargs):
+        # Retrieve info from the event dictionary
+        bounce_type = event.get('bounceType')
+        message_id = mail.get('messageId')
+
         print(f"Email {message_id} bounced. Type: {bounce_type}")
 
 Development
