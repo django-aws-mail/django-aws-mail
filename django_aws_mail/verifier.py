@@ -65,7 +65,7 @@ class NotificationVerifier(object):
             # bounces and complaints can come from multiple topics
             # MAIL_AWS_SNS_TOPIC_ARN is a list
             topic_hdr = self._request.META['HTTP_X_AMZ_SNS_TOPIC_ARN']
-            if topic_hdr not in mail_settings.SNS_TOPIC_ARN:
+            if topic_hdr not in mail_settings.AWS_SNS_TOPIC_ARN:
                 logger.warning(f"Notification contains bad topic: {topic_hdr}")
                 return False
 
