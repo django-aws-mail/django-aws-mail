@@ -29,9 +29,26 @@ packages = [{include = "django_aws_mail"}]
 include = ["sandbox", "example.env", "LICENSE", "README.rst"]
 
 
+[tool.poetry.group.dev.dependencies]
+coverage = "^7.13.4"
+
 [project.scripts]
 manage = "sandbox.manage:main"
 
 
 [project.urls]
 Repository = "https://github.com/django-aws-mail/django-aws-mail"
+
+
+[tool.coverage.run]
+source = ["django_aws_mail"]
+omit = [
+    "django_aws_mail/tests/*",
+    "django_aws_mail/migrations/*",
+    "django_aws_mail/apps.py",
+    "django_aws_mail/admin.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

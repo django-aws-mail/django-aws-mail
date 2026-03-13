@@ -39,7 +39,9 @@ class AwsSnsWebhook(View):
 
         notification_type = notification.get('Type')
         if notification_type == 'SubscriptionConfirmation':
-            self.handle_subscription_confirmation(notification)
+            response = self.handle_subscription_confirmation(notification)
+            if response:
+                return response
 
         elif notification_type == 'UnsubscribeConfirmation':
             self.handle_unsubscribe_confirmation(notification)

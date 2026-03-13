@@ -125,3 +125,15 @@ To run the sandbox management command:
 
     poetry install
     poetry run manage
+
+To run tests and get the coverage:
+
+.. code-block:: bash
+
+    poetry run manage test django_aws_mail
+
+    poetry run coverage run sandbox/manage.py test django_aws_mail
+
+    poetry run coverage report
+
+    poetry run coverage html

@@ -5,7 +5,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_spaces_between_tags
 
-from django_aws_mail.html import HTMLParser
+from django_aws_mail.parsers import HTMLParser
 
 
 def compose(recipients, subject, template, context=None, from_email=None, **kwargs):

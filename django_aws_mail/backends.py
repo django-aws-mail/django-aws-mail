@@ -4,9 +4,7 @@ Inspired by django-amazon-ses.
 """
 import boto3
 from botocore.exceptions import ClientError, BotoCoreError
-from email.utils import parseaddr
 
-from django import get_version
 from django.core.mail.backends.base import BaseEmailBackend
 from django_aws_mail.signals import mail_pre_send, mail_post_send
 from django_aws_mail.config import mail_settings
@@ -49,18 +47,21 @@ class EmailBackend(BaseEmailBackend):
 
     def _prepare_message(self, email_message):
         """Extracts envelope info and generates raw MIME data."""
+        from email.utils import parseaddr
+        from django import get_version
+
+        # clean recipients for the routing envelope
         recipients = [parseaddr(addr)[1] for addr in email_message.recipients()]
-        _, from_envelope = parseaddr(email_message.from_email)
 
         if get_version() < '6.0':
             # Support for legacy Django MIME handling
             data = email_message.message().as_bytes(linesep='\r\n')
         else:
             import email.policy
-            # Support for modern Django 6.0+ Python Email API
-            data = email_message.message(policy=email.policy.SMTPUTF8).as_bytes()
+            # use the standard SMTP policy to ensure strict 7-bit ASCII encoding
+            data = email_message.message(policy=email.policy.SMTP).as_bytes()
 
-        return from_envelope, recipients, data
+        return recipients, data
 
     def send_messages(self, email_messages):
         if not email_messages:
@@ -82,11 +83,10 @@ class EmailBackend(BaseEmailBackend):
         if not email_message.recipients():
             return False
 
-        from_envelope, recipients, data = self._prepare_message(email_message)
+        recipients, data = self._prepare_message(email_message)
 
         try:
             response = self.connection.send_email(
-                FromEmailAddress=from_envelope,
                 Destination={'ToAddresses': recipients},
                 Content={'Raw': {'Data': data}}
             )
