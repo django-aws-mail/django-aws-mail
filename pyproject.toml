@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 [project]
 name = "django-aws-mail"
 license = "MIT"
-version = "0.4.7"
+version = "1.0.0"
 description = "AWS mail for Django using SES and SNS."
 keywords = ["amazon", "mail", "aws", "ses", "sns", "django"]
 authors = [
