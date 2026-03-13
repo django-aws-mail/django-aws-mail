@@ -1,7 +1,0 @@
-
-poetry version patch, minor, major, prepatch, preminor, premajor, prerelease
-
-git add .
-git commit -m "docs: switch to shields.io badges"
-git tag v0.4.2
-git push origin main --tags
