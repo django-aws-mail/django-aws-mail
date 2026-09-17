@@ -59,7 +59,7 @@ The library provides a ``compose`` utility to easily create multipart emails (HT
 
 .. code-block:: python
 
-    from django_aws_mail.utils import compose
+    from django_aws_mail.message import compose
 
     # Create the message
     message = compose(
