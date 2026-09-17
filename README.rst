@@ -52,6 +52,17 @@ The library automatically detects the following environment variables (or Django
     MAIL_AWS_SNS_VERIFY_NOTIFICATION=true
     MAIL_AWS_SNS_VERIFY_CERTIFICATE=true
 
+If you wish to have Boto3 search for credentials (as explained in `Boto3's Credentials documentation <https://docs.aws.amazon.com/boto3/latest/guide/credentials.html#configuring-credentials>`), you can omit ``MAIL_AWS_ACCESS_KEY_ID`` and ``MAIL_AWS_SECRET_ACCESS_KEY``:
+
+.. code-block:: text
+
+    MAIL_AWS_REGION_NAME=eu-west-1
+
+    MAIL_AWS_SNS_TOPIC_ARN=arn:aws:sns:eu-west-1:123:abc
+    MAIL_AWS_SNS_VERIFY_NOTIFICATION=true
+    MAIL_AWS_SNS_VERIFY_CERTIFICATE=true
+
+
 Usage
 =====
 
