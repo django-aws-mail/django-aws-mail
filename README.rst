@@ -62,6 +62,8 @@ If you wish to have Boto3 search for credentials (as explained in `Boto3's Crede
     MAIL_AWS_SNS_VERIFY_NOTIFICATION=true
     MAIL_AWS_SNS_VERIFY_CERTIFICATE=true
 
+Create your AWS ACCESS KEYS by logging in to the AWS Console.  Then click your account name at the top right corner and select "Security credentials".
+Then, in the left sidebar menu, below "Access Management", select "Users" and click the button "Create user". Afterwards, chose to create an access key.
 
 Usage
 =====
